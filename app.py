@@ -8,17 +8,15 @@ from core.feature import extract_features  # Mengambil fungsi ekstraksi dari fol
 
 app = Flask(__name__)
 
-# Konfigurasi folder untuk menyimpan foto yang diunggah pengguna
-UPLOAD_FOLDER = os.path.join('static', 'uploads')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-MODEL_DIR = 'model'
+# --- KONFIGURASI PATH UNTUK VERCEL (/tmp) ---
+UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
+MODEL_DIR = os.path.join('/tmp', 'model')
 MODEL_NAME = 'random_forest_plant.pkl'
 MODEL_PATH = os.path.join(MODEL_DIR, MODEL_NAME)
 
-# GANTI INI dengan link direct download file .pkl kamu yang sudah diunggah ke cloud
-MODEL_URL = "https://drive.google.com/drive/folders/1j81BR2KqT3qEUKtEqIhNwyLj6Bq36dbP?usp=drive_link"
+# LINK GOOGLE DRIVE YANG SUDAH JADI DIRECT DOWNLOAD LINK
+MODEL_URL = "https://docs.google.com/uc?export=download&id=1j81BR2KqT3qEUKtEqIhNwyLj6Bq36dbP"
+CLASS_LABELS = {0: 'Sehat (Healthy)', 1: 'Bercak Daun (Leaf Mold)', 2: 'Daun Terbakar (Early Blight)'}
 
 def download_model_if_not_exists():
     """Fungsi untuk mengunduh model otomatis jika belum ada di server"""
