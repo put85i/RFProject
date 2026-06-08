@@ -18,7 +18,7 @@ MODEL_NAME = 'random_forest_plant.pkl'
 MODEL_PATH = os.path.join(MODEL_DIR, MODEL_NAME)
 
 # GANTI INI dengan link direct download file .pkl kamu yang sudah diunggah ke cloud
-MODEL_URL = "https://www.dropbox.com/scl/fi/xxxxxxxxx/random_forest_plant.pkl?dl=1"
+MODEL_URL = "https://drive.google.com/drive/folders/1j81BR2KqT3qEUKtEqIhNwyLj6Bq36dbP?usp=drive_link"
 
 def download_model_if_not_exists():
     """Fungsi untuk mengunduh model otomatis jika belum ada di server"""
