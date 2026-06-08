@@ -4,7 +4,12 @@ import numpy as np
 import cv2
 import urllib.request
 from flask import Flask, render_template, request, redirect
-from core.feature import extract_features  # Mengambil fungsi ekstraksi dari folder code
+
+# PENGAMAN IMPORT MODUL FITUR
+try:
+    from core.feature import extract_features
+except ImportError:
+    from code.feature import extract_features
 
 app = Flask(__name__)
 
@@ -14,41 +19,25 @@ MODEL_DIR = os.path.join('/tmp', 'model')
 MODEL_NAME = 'random_forest_plant.pkl'
 MODEL_PATH = os.path.join(MODEL_DIR, MODEL_NAME)
 
-# LINK GOOGLE DRIVE YANG SUDAH JADI DIRECT DOWNLOAD LINK
-MODEL_URL = "https://docs.google.com/uc?export=download&id=1j81BR2KqT3qEUKtEqIhNwyLj6Bq36dbP"
+MODEL_URL = "https://www.dropbox.com/scl/fi/9qs24p7j8jb0yqc98f6ck/random_forest_plant.pkl?rlkey=h89j6kyxxf5dom124jv5rdpiu&st=ckxuvlg8&dl=1"
+
 CLASS_LABELS = {0: 'Sehat (Healthy)', 1: 'Bercak Daun (Leaf Mold)', 2: 'Daun Terbakar (Early Blight)'}
 
 def download_model_if_not_exists():
-    """Fungsi untuk mengunduh model otomatis jika belum ada di server"""
+    """Fungsi download hanya berjalan di dalam runtime folder /tmp"""
     if not os.path.exists(MODEL_PATH):
-        print("Model tidak ditemukan! Memulai unduhan otomatis dari cloud...")
-        # Pastikan folder 'model/' sudah dibuat
+        print("Model tidak ditemukan di /tmp! Memulai unduhan otomatis dari cloud...")
         os.makedirs(MODEL_DIR, exist_ok=True)
-        
         try:
-            # Proses mengunduh file dari URL ke MODEL_PATH
             urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
-            print("Unduhan selesai! Model berhasil disimpan.")
+            print("Unduhan selesai! Model berhasil disimpan di /tmp.")
         except Exception as e:
             print(f"Gagal mengunduh model: {e}")
             raise e
-    else:
-        print("Model sudah tersedia, siap memuat ke sistem.")
-
-# Jalankan fungsi unduhan sebelum melakukan pickle.load
-download_model_if_not_exists()
-
-# Memuat model Random Forest ke memori aplikasi
-with open(MODEL_PATH, 'rb') as f:
-    model = pickle.load(f)
-
-# Mapping angka prediksi kembali menjadi teks nama penyakit
-CLASS_LABELS = {0: 'Sehat (Healthy)', 1: 'Bercak Daun (Leaf Mold)', 2: 'Daun Terbakar (Early Blight)'}
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        # Cek apakah pengguna sudah memilih file
         if 'file' not in request.files:
             return redirect(request.url)
         
@@ -57,32 +46,38 @@ def index():
             return redirect(request.url)
         
         if file:
-            # Simpan file yang diunggah ke folder static/uploads/
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            # 1. Folder upload baru dibuat saat user menekan tombol submit POST
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            file_path = os.path.join(UPLOAD_FOLDER, file.filename)
             file.save(file_path)
             
-            # 2. Ekstrak fitur dari gambar yang diunggah menggunakan OpenCV
+            # 2. Proses download & load model dijalankan AMAN di dalam fase runtime POST
+            download_model_if_not_exists()
+            
+            with open(MODEL_PATH, 'rb') as f:
+                model = pickle.load(f)
+            
+            # 3. Ekstraksi fitur dan prediksi model
             features = extract_features(file_path)
             
             if features is not None:
-                # 3. Lakukan prediksi menggunakan model Random Forest
-                features = features.reshape(1, -1) # Ubah ke bentuk 2D array untuk model
+                features = features.reshape(1, -1)
                 prediction_id = model.predict(features)[0]
                 result = CLASS_LABELS[prediction_id]
                 
-                # Hitung probabilitas/kemiripan hasil prediksi
                 probabilities = model.predict_proba(features)[0]
                 confidence = round(probabilities[prediction_id] * 100, 2)
             else:
                 result = "Gambar tidak dapat diproses oleh sistem."
                 confidence = 0
 
-            # Kirim hasil prediksi dan jalur foto kembali ke halaman web saat proses POST sukses
             return render_template('index.html', result=result, confidence=confidence, image_path=file_path)
 
-    # PERBAIKAN UTAMA: Saat di-refresh (GET), paksa semua variabel hasil menjadi None.
-    # Ini akan membuat tag {% if result %} di HTML bernilai False dan otomatis menghilangkan kotak hijau hasil analisis.
+    # Tampilan bersih saat pertama kali membuka web (GET)
     return render_template('index.html', result=None, confidence=None, image_path=None)
+
+# Membantu Vercel mengenali instansiasi aplikasi WSGI dengan benar
+app = app
 
 if __name__ == '__main__':
     app.run(debug=True)
