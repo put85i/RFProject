@@ -1,0 +1,30 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Model Machine Learning (Keluarkan dari Git karena ukurannya rawan membengkak)
+model/random_forest_plant.pkl
+*.pkl
+*.h5
+*.onnx
+
+# Dataset Foto (Sangat dilarang masuk ke GitHub/Deploy karena super berat)
+dataset/
+data_raw/
+*.zip
+*.rar
+
+# File Upload hasil uji coba web
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# Editor & Sistem Operasi
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

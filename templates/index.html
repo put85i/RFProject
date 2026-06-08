@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Plant Scanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #EBF4DD;
+            --bg-card: #ffffff;
+            --green-sage: #578b68;
+            --text-dark: #2C3333;
+            --text-muted: #526D82;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding-bottom: 40px;
+        }
+
+        /* 1. Header Banner Atas (Sesuai Referensi) */
+        .dashboard-header {
+            background-color: var(--green-sage);
+            color: white;
+            padding: 40px 60px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .badge-app {
+            background-color: rgba(255, 255, 255, 0.25);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .dashboard-header h1 {
+            font-weight: 800;
+            font-size: 2.2rem;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .dashboard-header p {
+            font-size: 1rem;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        /* Container Utama Dashboard */
+        .dashboard-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* 2. Menu Navigasi Tab Tipis */
+        .nav-tabs-custom {
+            display: flex;
+            gap: 25px;
+            border-bottom: 2px solid rgba(159, 199, 173, 0.3);
+            margin-bottom: 30px;
+            padding-bottom: 8px;
+        }
+
+        .nav-link-custom {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            position: relative;
+            padding: 4px 0;
+        }
+
+        .nav-link-custom.active {
+            color: var(--text-dark);
+        }
+
+        .nav-link-custom.active::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--green-sage);
+            border-radius: 2px;
+        }
+
+        /* 3. Kartu Dashboard Utama */
+        .dashboard-card {
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+            height: 100%;
+        }
+
+        .card-title-custom {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 4. Area Upload Gaya Drag & Drop */
+        .upload-dropzone {
+            border: 2px dashed #cbdcc1;
+            background-color: #fcfdfe;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .upload-dropzone:hover {
+            border-color: var(--green-sage);
+            background-color: #f7faf5;
+        }
+
+        .upload-icon-box {
+            width: 54px;
+            height: 54px;
+            background-color: var(--bg-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+        }
+
+        .upload-icon-box svg {
+            width: 24px;
+            height: 24px;
+            fill: #7fa68d;
+        }
+
+        .upload-text-main {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .upload-text-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Menyembunyikan input file asli tapi membuatnya memenuhi area dnd agar bisa diklik */
+        .hidden-file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .btn-submit-dashboard {
+            background-color: var(--green-sage);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.1s ease;
+        }
+
+        .btn-submit-dashboard:active {
+            transform: scale(0.99);
+        }
+
+        /* 5. Hasil Analisis Minimalis */
+        .result-panel {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 12px;
+            background-color: var(--bg-main);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .img-preview-fixed {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid white;
+            flex-shrink: 0;
+        }
+
+        /* 6. List Kelompok Panduan Karakteristik (Kanan) */
+        .guide-box {
+            padding: 16px 20px;
+            border-radius: 12px;
+            background-color: var(--bg-main);
+            margin-bottom: 15px;
+            border-left: 5px solid transparent;
+        }
+
+        .guide-box.healthy { border-left-color: #2a9d8f; background-color: #f2f7f4; }
+        .guide-box.mold { border-left-color: #d6a12e; background-color: #fbf7ed; }
+        .guide-box.blight { border-left-color: #e76f51; background-color: #fdf4f2; }
+
+        .guide-box-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .guide-box-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Footer bawah */
+        .dashboard-footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-header">
+    <div class="dashboard-container">
+        <h1>Smart Plant Scanner</h1>
+        <p>Sistem klasifikasi tingkat kesehatan dan deteksi penyakit patogen pada daun tanaman hias.</p>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    
+    <div class="nav-tabs-custom">
+        <a href="#" class="nav-link-custom active">Input Data</a>
+    </div>
+
+    <div class="row g-4 align-items-stretch">
+        
+        <div class="col-lg-7">
+            <div class="dashboard-card">
+                <div class="card-title-custom">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    Unggah Dataset Gambar Daun
+                </div>
+                
+                <form action="/" method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <div class="upload-dropzone" id="dropzone">
+                        <div class="upload-icon-box">
+                            <!-- Icon Cloud Upload -->
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                            </svg>
+                        </div>
+                        <!-- Id 'fileName' ditambahkan untuk menampilkan nama file yang dipilih -->
+                        <div class="upload-text-main" id="fileName">Klik atau seret & drop file gambar di sini</div>
+                        <div class="upload-text-sub">Mendukung format JPG, JPEG, atau PNG (Maks. 5 MB)</div>
+                        
+                        <!-- 'onchange="form.submit()"' DIHAPUS, diganti dengan fungsi updateText -->
+                        <input type="file" class="hidden-file-input" name="file" id="fileInput" accept="image/*" required onchange="updateFileName()">
+                    </div>
+                    <button type="submit" class="btn btn-submit-dashboard">ANALISIS SEKARANG</button>
+                </form>
+
+                <script>
+                // Fungsi ini HANYA untuk memunculkan nama file yang dipilih user di dalam kotak dropzone
+                function updateFileName() {
+                    const input = document.getElementById('fileInput');
+                    const fileNameDisplay = document.getElementById('fileName');
+                    
+                    if (input.files.length > 0) {
+                        fileNameDisplay.innerText = "File terpilih: " + input.files[0].name;
+                        fileNameDisplay.style.color = "#2a9d8f"; // Memberikan warna hijau penanda sukses
+                    }
+                }
+
+                // Bersihkan localStorage lama jika sebelumnya sempat tersimpan agar tidak mengganggu lagi
+                localStorage.removeItem('lastAnalysis');
+                sessionStorage.removeItem('lastAnalysis');
+                </script>
+
+                {% if result %}
+                <div class="result-panel">
+                    {% if image_path %}
+                    <img src="{{ image_path }}" class="img-preview-fixed" alt="Preview">
+                    {% endif %}
+                    <div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Hasil Diagnosis AI</div>
+                        <div style="font-size: 1.2rem; font-weight: 800; color: var(--text-dark); margin: 2px 0;">{{ result }}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Tingkat Akurasi: <strong>{{ confidence }}%</strong></div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="dashboard-card">
+                <div class="card-title-custom">
+                    3 Segmen Karakteristik Daun
+                </div>
+                
+                <div class="guide-box healthy">
+                    <div class="guide-box-title" style="color: #2a9d8f;">Sehat (Healthy)</div>
+                    <p class="guide-box-desc">Daun memiliki permukaan yang bersih, mulus, dan didominasi pigmen warna hijau segar secara merata tanpa deformasi.</p>
+                </div>
+
+                <div class="guide-box mold">
+                    <div class="guide-box-title" style="color: #b58115;">Bercak Daun (Leaf Mold)</div>
+                    <p class="guide-box-desc">Muncul bercak pucat kekuningan di permukaan atas disertai pertumbuhan lapisan jamur halus di bagian bawah daun.</p>
+                </div>
+
+                <div class="guide-box blight">
+                    <div class="guide-box-title" style="color: #cd5334;">Daun Terbakar (Early Blight)</div>
+                    <p class="guide-box-desc">Bercak melingkar cokelat tua hingga hitam membentuk pola target cincin konsentris, tepi daun mengering drastis.</p>
+                </div>
+
+                <div class="mt-4 pt-1 text-end" style="border-top: 1px solid rgba(0,0,0,0.05);">
+                    <small class="text-muted" style="font-size: 0.75rem;">Metode: HSV Color Space & Canny Edge Density</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
